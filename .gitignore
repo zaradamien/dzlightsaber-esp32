@@ -1,0 +1,10 @@
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Vendor files
+vendor/*
+
+# Important!
+!.gitkeep
