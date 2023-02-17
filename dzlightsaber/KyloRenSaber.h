@@ -7,92 +7,88 @@
 
  class KyloRenSaber : public LightSaber
  {
-   
- private: 
 
-  ledLigth preONSequence[sequenceRows][sequenceColumns] = { 
-    {{0,5,50,_WHITE_},{6,7,25,_WHITE_},{9,9,25,_WHITE_},{11,11,25,_WHITE_},{15,17,100,_WHITE_},{18,21,25,_WHITE_},{23,24,25,_WHITE_}},
-    {{0,10,50,_WHITE_},{13,15,100,_WHITE_},{19,20,50,_WHITE_},{23,26,50,_WHITE_}},
-    {{0,1,25,_WHITE_},{6,9,100,_WHITE_},{12,14,25,_WHITE_}},
-    {{0,14,100,_WHITE_}},
-    {{0,_NUM_LEDS_,0,_BLACK_}},
-    {{0,9,50,_WHITE_},{12,15,25,_WHITE_},{22,24,50,_WHITE_},{29,29,50,_WHITE_},{32,34,50,_WHITE_}},
-    {{0,_NUM_LEDS_,0,_BLACK_}},
-    {{0,_NUM_LEDS_,0,_BLACK_}},
-    {{0,4,50,_WHITE_},{7,17,50,_WHITE_},{22,32,50,_WHITE_},{33,41,25,_WHITE_},{42,48,50,_WHITE_}},
-    {{0,4,25,_WHITE_},{4,9,50,_WHITE_},{10,13,25,_WHITE_}},
-    {{0,2,50,_WHITE_},{3,5,25,_WHITE_}},
-    {{0,_NUM_LEDS_,0,_BLACK_}},
-    {{0,_NUM_LEDS_,0,_BLACK_}},
-    {{0,2,50,_WHITE_},{3,5,25,_WHITE_},{9,11,50,_WHITE_},{13,14,25,_WHITE_}},
-    {{0,1,50,_WHITE_},{2,4,25,_WHITE_},{8,11,25,_WHITE_}}, //4:18
-    {{0,20,50,_WHITE_},{21,23,25,_WHITE_}}, 
-    {{0,_NUM_LEDS_,0,_BLACK_}},
-    {{0,_NUM_LEDS_,0,_BLACK_}},
-    {{0,11,50,_WHITE_},{17,17,50,_WHITE_},{19,20,25,_WHITE_}}, 
-    {{0,_NUM_LEDS_,0,_BLACK_}},
-    {{0,_NUM_LEDS_,0,_BLACK_}},
-    {{0,2,50,_WHITE_}}, //5:06
-    {{0,3,50,_WHITE_},{4,8,25,_WHITE_},{9,11,50,_WHITE_},{11,14,25,_WHITE_},{15,17,50,_WHITE_},{17,20,25,_WHITE_}}, 
-    {{0,_NUM_LEDS_,0,_BLACK_}},
-    {{0,_NUM_LEDS_,0,_BLACK_}}
-    //{{0,1,50,_WHITE_}} //6.06
-  };
+  public:
+      // Parent Construct
+      KyloRenSaber(bool havePreON,uint8_t red,uint8_t green, uint8_t blue) : LightSaber( havePreON,red,green,blue){
+        // Copy sequences
+        memcpy(this->preONSequence, this->kyloPreONSequence, sizeof(this->preONSequence));
+        memcpy(this->bladeSequence, this->kyloBladeSequence, sizeof(this->bladeSequence));
+      }
 
- public:
-    // Parent Construct
-    KyloRenSaber(bool havePreON,uint8_t red,uint8_t green, uint8_t blue) : LightSaber( havePreON,red,green,blue){}
+      // Construct      
+      KyloRenSaber() : LightSaber(){
 
-    // Construct
-    KyloRenSaber(){
-      Setup();
-    }
-    
-    
-    void Setup(){
-      this->defaultColor = "RED";
-      this->havePreON = true;
-      this->red = 255;
-      this->green = 0;
-      this->blue = 0;
-
-      // LightSaber::set_preON(kylo_preon);
-    };
-
-      
-
-    void displayTest(){
+        Serial.print("+++++++++++ KYLO REN ++++++++++ \n\r");          
         
-        for ( int i = 0; i < sequenceRows; ++i)
-        {
-            for ( int j = 0; j < sequenceColumns; ++j)
-            {
-                // check if value exists
-                if (this->preONSequence[i][j].to != 0){
-                  lightFromToTest(this->preONSequence[i][j]);
-                }
-            }
-      
-        }
-    }
+        // Set saber configuration
+        this->defaultColor = "RED";
+        this->havePreON = true;
+        this->saberColor = {255, 0, 0};
+
+        // Copy sequences
+        memcpy(this->preONSequence, this->kyloPreONSequence, sizeof(this->preONSequence));
+        memcpy(this->bladeSequence, this->kyloBladeSequence, sizeof(this->bladeSequence));
+
+      }
+
+  protected: 
+
+    ledLigth kyloPreONSequence[sequenceRows][sequenceColumns] = { 
+        {{0,5,50,_WHITE_},{6,7,25,_WHITE_},{9,9,25,_WHITE_},{11,11,25,_WHITE_},{15,17,100,_WHITE_},{18,21,25,_WHITE_},{23,24,25,_WHITE_}},
+        {{0,10,50,_WHITE_},{13,15,100,_WHITE_},{19,20,50,_WHITE_},{23,26,50,_WHITE_}},
+        {{0,1,25,_WHITE_},{6,9,100,_WHITE_},{12,14,25,_WHITE_}},
+        {{0,14,100,_WHITE_}},
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        {{0,9,50,_WHITE_},{12,15,25,_WHITE_},{22,24,50,_WHITE_},{29,29,50,_WHITE_},{32,34,50,_WHITE_}},
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        {{0,4,50,_WHITE_},{7,17,50,_WHITE_},{22,32,50,_WHITE_},{33,41,25,_WHITE_},{42,48,50,_WHITE_}},
+        {{0,4,25,_WHITE_},{4,9,50,_WHITE_},{10,13,25,_WHITE_}},
+        {{0,2,50,_WHITE_},{3,5,25,_WHITE_}},
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        {{0,2,50,_WHITE_},{3,5,25,_WHITE_},{9,11,50,_WHITE_},{13,14,25,_WHITE_}},
+        {{0,1,50,_WHITE_},{2,4,25,_WHITE_},{8,11,25,_WHITE_}}, //4:18
+        {{0,20,50,_WHITE_},{21,23,25,_WHITE_}}, 
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        {{0,11,50,_WHITE_},{17,17,50,_WHITE_},{19,20,25,_WHITE_}}, 
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        {{0,2,50,_WHITE_}}, //5:06
+        {{0,3,50,_WHITE_},{4,8,25,_WHITE_},{9,11,50,_WHITE_},{11,14,25,_WHITE_},{15,17,50,_WHITE_},{17,20,25,_WHITE_}}, 
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        {{0,_NUM_LEDS_,0,_BLACK_}},
+        //{{0,1,50,_WHITE_}} //6.06
+      };
 
 
-  void lightFromToTest(ledLigth sequence) {
-    Serial.print("Light");
-    for (int i = sequence.from; i <= sequence.to; ++i)
-    {   
-         Serial.print(sequence.color.r);
-         Serial.print(" ");
-         Serial.print(sequence.color.g);
-         Serial.print(" ");
-         Serial.print(sequence.color.b);
-        Serial.print("\n\r");
-        // setPixel(i, 255, 0, 0);
-        FastLED.show();
-        // delay(25);
-    }
-
-  }
+    ledLigth kyloBladeSequence[sequenceRows][sequenceColumns] = { 
+      {{0,60,25,_RED_},{0,4,50,_RED_},{7,8,50,_RED_},{10,13,50,_RED_},{17,17,50,_RED_},{21,24,50,_RED_},{30,34,50,_RED_},{37,38,50,_RED_},{40,43,50,_RED_},{47,47,50,_RED_},{51,54,50,_RED_}},
+      {{0,60,25,_RED_},{2,6,50,_RED_},{9,10,50,_RED_},{12,15,50,_RED_},{19,19,50,_RED_},{23,26,50,_RED_},{32,36,50,_RED_},{39,40,50,_RED_},{42,45,50,_RED_},{49,49,50,_RED_},{53,56,50,_RED_}},
+      {{0,60,25,_RED_},{6,10,50,_RED_},{13,14,50,_RED_},{16,19,50,_RED_},{24,24,50,_RED_},{27,30,50,_RED_},{36,40,50,_RED_},{43,44,50,_RED_},{46,49,100,_RED_},{53,53,50,_RED_},{57,60,50,_RED_}},
+      {{0,60,25,_RED_},{0,2,50,_RED_},{5,6,50,_RED_},{8,11,50,_RED_},{15,15,50,_RED_},{19,22,50,_RED_},{28,34,50,_RED_},{38,41,50,_RED_},{45,45,50,_RED_},{49,54,50,_RED_}},
+      {{0,60,25,_RED_},{5,9,100,_RED_}, {12,13,50,_RED_}, {15,18,50,_RED_}, {22,22,50,_RED_}, {26,29,50,_RED_}, {35,39,50,_RED_}, {42,43,50,_RED_}, {45,48,50,_RED_}, {52,52,50,_RED_}, {56,59,50,_RED_}},
+      {{0,60,25,_RED_},{9,13,50,_RED_}, {16,17,50,_RED_}, {19,22,50,_RED_}, {27,27,50,_RED_}, {30,33,50,_RED_}, {39,43,50,_RED_}, {46,47,50,_RED_}, {49,52,50,_RED_}, {56,56,50,_RED_}, {60,60,50,_RED_}},
+      {{0,60,25,_RED_},{12,16,50,_RED_}, {19,20,50,_RED_}, {22,25,50,_RED_}, {30,30,50,_RED_}, {33,36,50,_RED_}, {42,46,50,_RED_}, {49,50,50,_RED_}, {52,55,50,_RED_}, {59,59,50,_RED_}},
+      {{0,60,25,_RED_},{7,11,50,_RED_}, {14,15,50,_RED_}, {17,20,50,_RED_}, {24,24,50,_RED_}, {28,31,50,_RED_}, {37,41,50,_RED_}, {44,45,50,_RED_}, {47,50,50,_RED_}, {54,54,50,_RED_}, {58,61,50,_RED_}},
+      {{0,60,25,_RED_},{3,7,50,_RED_}, {10,11,50,_RED_}, {13,16,100,_RED_}, {20,20,50,_RED_}, {24,27,50,_RED_}, {33,37,50,_RED_}, {40,41,50,_RED_}, {43,46,100,_RED_}, {50,50,50,_RED_}, {54,57,50,_RED_}},
+      {{0,60,25,_RED_},{10,14,50,_RED_}, {17,18,50,_RED_}, {20,23,50,_RED_}, {28,28,100,_RED_}, {31,34,50,_RED_}, {40,44,50,_RED_}, {47,48,50,_RED_}, {50,53,50,_RED_}, {57,57,50,_RED_}} ,
+      {{0,60,25,_RED_},{5,9,50,_RED_}, {12,13,50,_RED_}, {15,18,50,_RED_}, {22,22,50,_RED_}, {26,29,50,_RED_}, {35,39,50,_RED_}, {42,43,50,_RED_}, {45,48,50,_RED_}, {52,52,50,_RED_}, {56,59,50,_RED_}},
+      {{0,60,25,_RED_},{9,13,50,_RED_}, {16,17,50,_RED_}, {19,22,50,_RED_}, {27,27,50,_RED_}, {30,33,50,_RED_}, {39,43,50,_RED_}, {46,47,50,_RED_}, {49,52,50,_RED_}, {56,56,50,_RED_}, {60,60,50,_RED_}},
+      {{0,60,25,_RED_},{12,16,50,_RED_}, {19,20,50,_RED_}, {22,25,50,_RED_}, {30,30,50,_RED_}, {33,36,50,_RED_}, {42,46,50,_RED_}, {49,50,50,_RED_}, {52,55,50,_RED_}, {59,59,50,_RED_}},
+      {{0,60,25,_RED_},{2,6,50,_RED_},{9,10,50,_RED_},{12,15,50,_RED_},{19,19,50,_RED_},{23,26,50,_RED_},{32,36,50,_RED_},{39,40,50,_RED_},{42,45,50,_RED_},{49,49,50,_RED_},{53,56,50,_RED_}},
+      {{0,60,25,_RED_},{6,10,50,_RED_},{13,14,50,_RED_},{16,19,100,_RED_},{24,24,50,_RED_},{27,30,50,_RED_},{36,40,50,_RED_},{43,44,50,_RED_},{46,49,50,_RED_},{53,53,50,_RED_},{57,60,50,_RED_}},
+      {{0,60,25,_RED_},{0,2,50,_RED_},{5,6,50,_RED_},{8,11,50,_RED_},{15,15,50,_RED_},{19,22,50,_RED_},{28,34,50,_RED_},{38,41,50,_RED_},{45,45,50,_RED_},{49,54,50,_RED_}},
+      {{0,60,25,_RED_},{5,9,50,_RED_}, {12,13,50,_RED_}, {15,18,50,_RED_}, {22,22,100,_RED_}, {26,29,50,_RED_}, {35,39,50,_RED_}, {42,43,50,_RED_}, {45,48,50,_RED_}, {52,52,50,_RED_}, {56,59,50,_RED_}},
+      {{0,60,25,_RED_},{9,13,50,_RED_}, {16,17,50,_RED_}, {19,22,50,_RED_}, {27,27,50,_RED_}, {30,33,50,_RED_}, {39,43,50,_RED_}, {46,47,50,_RED_}, {49,52,50,_RED_}, {56,56,50,_RED_}, {60,60,50,_RED_}},
+      {{0,60,25,_RED_},{12,16,50,_RED_}, {19,20,50,_RED_}, {22,25,50,_RED_}, {30,30,50,_RED_}, {33,36,50,_RED_}, {42,46,50,_RED_}, {49,50,50,_RED_}, {52,55,50,_RED_}, {59,59,50,_RED_}},
+      {{0,60,25,_RED_},{0,2,100,_RED_},{5,6,50,_RED_},{8,11,50,_RED_},{15,15,50,_RED_},{19,22,50,_RED_},{28,34,50,_RED_},{38,41,50,_RED_},{45,45,50,_RED_},{49,54,50,_RED_}},
+      {{0,60,25,_RED_},{5,9,50,_RED_}, {12,13,50,_RED_}, {15,18,50,_RED_}, {22,22,50,_RED_}, {26,29,50,_RED_}, {35,39,100,_RED_}, {42,43,50,_RED_}, {45,48,50,_RED_}, {52,52,50,_RED_}, {56,59,50,_RED_}},
+      {{0,60,25,_RED_},{9,13,50,_RED_}, {16,17,50,_RED_}, {19,22,50,_RED_}, {27,27,50,_RED_}, {30,33,50,_RED_}, {39,43,50,_RED_}, {46,47,50,_RED_}, {49,52,50,_RED_}, {56,56,50,_RED_}, {60,60,50,_RED_}},
+      {{0,60,25,_RED_},{12,16,50,_RED_}, {19,20,50,_RED_}, {22,25,50,_RED_}, {30,30,50,_RED_}, {33,36,50,_RED_}, {42,46,50,_RED_}, {49,50,50,_RED_}, {52,55,50,_RED_}, {59,59,50,_RED_}}
+    };
 
  };
 

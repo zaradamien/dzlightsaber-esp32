@@ -34,42 +34,45 @@ struct ledLigth {
 };
 
 const int sequenceRows = 35;
-const int sequenceColumns = 10;
+const int sequenceColumns = 15;
 
 const int _NUM_LEDS_= 60;
 
 const Color _RED_ = {255,0,0};
+const Color _GREEN_ = {0,255,0};
+const Color _BLUE_ = {0,0,255};
 const Color _WHITE_ = {255,255,255};
 const Color _BLACK_ = {0,0,0};
+const Color _YELLOW_ = {255,255,0};
 
-ledLigth kylo_preon[sequenceRows][sequenceColumns] = { 
-  {{0,5,50,_WHITE_},{6,7,25,_WHITE_},{9,9,25,_WHITE_},{11,11,25,_WHITE_},{15,17,100,_WHITE_},{18,21,25,_WHITE_},{23,24,25,_WHITE_}},
-  {{0,10,50,_WHITE_},{13,15,100,_WHITE_},{19,20,50,_WHITE_},{23,26,50,_WHITE_}},
-  {{0,1,25,_WHITE_},{6,9,100,_WHITE_},{12,14,25,_WHITE_}},
-  {{0,14,100,_WHITE_}},
-  {{0,_NUM_LEDS_,0,_BLACK_}},
-  {{0,9,50,_WHITE_},{12,15,25,_WHITE_},{22,24,50,_WHITE_},{29,29,50,_WHITE_},{32,34,50,_WHITE_}},
-  {{0,_NUM_LEDS_,0,_BLACK_}},
-  {{0,_NUM_LEDS_,0,_BLACK_}},
-  {{0,4,50,_WHITE_},{7,17,50,_WHITE_},{22,32,50,_WHITE_},{33,41,25,_WHITE_},{42,48,50,_WHITE_}},
-  {{0,4,25,_WHITE_},{4,9,50,_WHITE_},{10,13,25,_WHITE_}},
-  {{0,2,50,_WHITE_},{3,5,25,_WHITE_}},
-  {{0,_NUM_LEDS_,0,_BLACK_}},
-  {{0,_NUM_LEDS_,0,_BLACK_}},
-  {{0,2,50,_WHITE_},{3,5,25,_WHITE_},{9,11,50,_WHITE_},{13,14,25,_WHITE_}},
-  {{0,1,50,_WHITE_},{2,4,25,_WHITE_},{8,11,25,_WHITE_}}, //4:18
-  {{0,20,50,_WHITE_},{21,23,25,_WHITE_}}, 
-  {{0,_NUM_LEDS_,0,_BLACK_}},
-  {{0,_NUM_LEDS_,0,_BLACK_}},
-  {{0,11,50,_WHITE_},{17,17,50,_WHITE_},{19,20,25,_WHITE_}}, 
-  {{0,_NUM_LEDS_,0,_BLACK_}},
-  {{0,_NUM_LEDS_,0,_BLACK_}},
-  {{0,2,50,_WHITE_}}, //5:06
-  {{0,3,50,_WHITE_},{4,8,25,_WHITE_},{9,11,50,_WHITE_},{11,14,25,_WHITE_},{15,17,50,_WHITE_},{17,20,25,_WHITE_}}, 
-  {{0,_NUM_LEDS_,0,_BLACK_}},
-  {{0,_NUM_LEDS_,0,_BLACK_}}
-  //{{0,1,50,_WHITE_}} //6.06
-};
+// ledLigth kylo_preon[sequenceRows][sequenceColumns] = { 
+//   {{0,5,50,_WHITE_},{6,7,25,_WHITE_},{9,9,25,_WHITE_},{11,11,25,_WHITE_},{15,17,100,_WHITE_},{18,21,25,_WHITE_},{23,24,25,_WHITE_}},
+//   {{0,10,50,_WHITE_},{13,15,100,_WHITE_},{19,20,50,_WHITE_},{23,26,50,_WHITE_}},
+//   {{0,1,25,_WHITE_},{6,9,100,_WHITE_},{12,14,25,_WHITE_}},
+//   {{0,14,100,_WHITE_}},
+//   {{0,_NUM_LEDS_,0,_BLACK_}},
+//   {{0,9,50,_WHITE_},{12,15,25,_WHITE_},{22,24,50,_WHITE_},{29,29,50,_WHITE_},{32,34,50,_WHITE_}},
+//   {{0,_NUM_LEDS_,0,_BLACK_}},
+//   {{0,_NUM_LEDS_,0,_BLACK_}},
+//   {{0,4,50,_WHITE_},{7,17,50,_WHITE_},{22,32,50,_WHITE_},{33,41,25,_WHITE_},{42,48,50,_WHITE_}},
+//   {{0,4,25,_WHITE_},{4,9,50,_WHITE_},{10,13,25,_WHITE_}},
+//   {{0,2,50,_WHITE_},{3,5,25,_WHITE_}},
+//   {{0,_NUM_LEDS_,0,_BLACK_}},
+//   {{0,_NUM_LEDS_,0,_BLACK_}},
+//   {{0,2,50,_WHITE_},{3,5,25,_WHITE_},{9,11,50,_WHITE_},{13,14,25,_WHITE_}},
+//   {{0,1,50,_WHITE_},{2,4,25,_WHITE_},{8,11,25,_WHITE_}}, //4:18
+//   {{0,20,50,_WHITE_},{21,23,25,_WHITE_}}, 
+//   {{0,_NUM_LEDS_,0,_BLACK_}},
+//   {{0,_NUM_LEDS_,0,_BLACK_}},
+//   {{0,11,50,_WHITE_},{17,17,50,_WHITE_},{19,20,25,_WHITE_}}, 
+//   {{0,_NUM_LEDS_,0,_BLACK_}},
+//   {{0,_NUM_LEDS_,0,_BLACK_}},
+//   {{0,2,50,_WHITE_}}, //5:06
+//   {{0,3,50,_WHITE_},{4,8,25,_WHITE_},{9,11,50,_WHITE_},{11,14,25,_WHITE_},{15,17,50,_WHITE_},{17,20,25,_WHITE_}}, 
+//   {{0,_NUM_LEDS_,0,_BLACK_}},
+//   {{0,_NUM_LEDS_,0,_BLACK_}}
+//   //{{0,1,50,_WHITE_}} //6.06
+// };
 
 
 

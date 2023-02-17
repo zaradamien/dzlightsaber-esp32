@@ -47,6 +47,8 @@ static const int buttonPin = 17;
 int pressed = 0;
 bool on = false;
 
+bool preOnDone = false;
+
 byte nowColor, red, green, blue, redOffset, greenOffset, blueOffset;
 // CRGB ledsStrip[NUM_LEDS];
 
@@ -54,12 +56,17 @@ byte nowColor, red, green, blue, redOffset, greenOffset, blueOffset;
 // AudioOutput audioOutput;
 // SynthSound *humSound = 0;
 
+byte switchColor = 0;
+
+LightSaber s1= LightSaber();
+KyloRenSaber* k1;
+
 void setup() {
 
     Serial.begin(115200);
     Serial.print("OK");
 
-
+    k1 = new KyloRenSaber();
   // sounds.play(audioSystem, 0, 0.5, 1);  
   // humSound = new SynthSound();
   // humSound->init(audioSystem);
@@ -99,62 +106,67 @@ void setup() {
     setAll(0, 0, 0);             // and turn it off
 
 
-    LightSaber l1= LightSaber();
-    KyloRenSaber k1= KyloRenSaber();
-    KyloRenSaber k2= KyloRenSaber(true,255,0,0);
-    l1.display();
-    k2.display();
+  // KyloRenSaber s1= KyloRenSaber();
+    // s1= LightSaber();
+    // KyloRenSaber s1= KyloRenSaber();
+    // KyloRenSaber k2= KyloRenSaber(true,255,0,0);
+    // k1.display();
 }
 
 void loop() {
 
-  // Calculate time for button
-  static int time = 0;
-  int t = millis();
-  int dt = time - t;
-  time = t;
+    // Calculate time for button
+    static int time = 0;
+    int t = millis();
+    int dt = time - t;
+    time = t;
 
+    
+
+    // // Test Switch color
+    // k1->switchColor(switchColor);
+    // switchColor = switchColor == 5 ? 0 : switchColor+1;
+
+    // // Turn On
+    // k1->turnOn(preOnDone);  
+    // if (!preOnDone){
+    //   preOnDone = true;      
+    // }
 
     // Serial.print("OloopK");
     // audio.loop();   
 
-    
-  // preonSequence(100);
-  //kyloSequence(50);
+  
+    if(!digitalRead(buttonPin))
+    {    
+      pressed += dt;
 
-//         setPixel(1, 255, 0,0);
-//         setPixel(6, 20, 0,0);
-
-//     ledsStrip[4].r = 40;
-//     ledsStrip[4].g = 40;
-//     ledsStrip[4].b = 0;
-// FastLED.show();
-
-  if(!digitalRead(buttonPin))
-  {    
-    pressed += dt;
-
-    Serial.print("pressed");
-    Serial.print("\t\t");
-    Serial.print(pressed);
-    Serial.println();
+      // Serial.print("pressed");
+      // Serial.print("\t\t");
+      // Serial.print(pressed);
+      // Serial.println();
 
       if(pressed < -2000)
       {
         if (on){
           on = false;
           Serial.print("OFF"); Serial.print("\t\t");
-          turnOff();
+          k1->turnOff();
+          preOnDone = false;   
+
         } else {
           on = true;
           Serial.print("ON"); Serial.print("\t\t");
-          turnOn();
+          
+          // Turn On
+          k1->turnOn(preOnDone);  
+          if (!preOnDone){
+            preOnDone = true;      
+          }
         }
-        
-        pressed = 0;  
-        
+        pressed = 0;   
       }
-  }
+    }
 }
 
 
@@ -269,7 +281,7 @@ void light_up(byte red, byte green, byte blue) {
   for (char i = 0; i <= (NUM_LEDS - 1); i++) {        
     setPixel(i, red, green, blue);
     FastLED.show();
-    delay(25);
+    delay(5);
   }
 }
 
@@ -277,7 +289,7 @@ void light_down() {
   for (char i = (NUM_LEDS - 1); i >= 0; i--) {      
     setPixel(i, 0, 0, 0);
     FastLED.show();
-    delay(25);
+    delay(5);
   }
 }
 
@@ -357,21 +369,3 @@ void setColor(byte color) {
 
 
 
-
-void __light_up(byte red, byte green, byte blue) {
-  for (char i = 0; i <= (NUM_LEDS / 2 - 1); i++) {        
-    setPixel(i, red, green, blue);
-    setPixel((NUM_LEDS - 1 - i), red, green, blue);
-    FastLED.show();
-    delay(25);
-  }
-}
-
-void __light_down() {
-  for (char i = (NUM_LEDS / 2 - 1); i >= 0; i--) {      
-    setPixel(i, 0, 0, 0);
-    setPixel((NUM_LEDS - 1 - i), 0, 0, 0);
-    FastLED.show();
-    delay(25);
-  }
-}
