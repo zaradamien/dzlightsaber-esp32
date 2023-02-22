@@ -39,30 +39,57 @@ class LightSaber {
       }
       
       void turnOn(bool preOnDone)
-      {  
-        if (!this->isOn){          
-          // PreON Sequence
-          if (this->havePreON && !preOnDone){
-            preON();
-          }
+      {    
+          // // PreON Sequence
+          // if (this->havePreON && !this->isOn && !preOnDone){
+          //   preON();
+          // }
 
           // Blade Sequence
           Blade(5);
 
             // is On
           this->isOn = true;
-         }
       }
 
       void Blade(int delayBetweenSequence = 25)
       {  
-          // Serial.println("Blade\n\r");
+          Serial.println("\n\r\n\rBlade");
 
-          // Play sound Blade
+          
 
           // Show Blade sequence
-          displaySequence(0,delayBetweenSequence, 0);
+          // displaySequence(0,delayBetweenSequence, 0);
+          displayBladeSequence(0);
       }
+
+      void displayBladeSequence(int delayBetweenSequence = 25, int useSequenceColor = 0){
+ 
+          // Play sound Blade
+          audio.setVolume(15); // 0...21
+          audio.connecttoSD("/vader/vader_menu.wav");
+          audio.loop();
+          delay(10);
+          
+          Serial.println("-- Blade sequence");
+
+  
+          for ( int i = 0; i < sequenceRows; ++i)
+          {
+              for ( int j = 0; j < sequenceColumns; ++j)
+              {
+                  // check if value exists
+                  if (sequence[i][j].to != 0){
+                    lightLedsFromTo(this->bladeSequence[i][j], useSequenceColor);
+                  }
+              }
+            // add delay between sequence
+            delay(delayBetweenSequence);
+          }
+
+          Serial.println("++ Blade sequence");
+      }
+
 
       
       void preON(int delayBetweenSequence = 25)
@@ -72,23 +99,14 @@ class LightSaber {
           // Play sound preon
 
           // Show Preon sequence
-          displaySequence(1,delayBetweenSequence, 1);
+          // displaySequence(1,delayBetweenSequence, 1);
+          displaypreONSequence(delayBetweenSequence, 1);
       }
 
 
+    void displaypreONSequence(int delayBetweenSequence = 25, int useSequenceColor = 0){
 
-    void displaySequence(int sequenceType, int delayBetweenSequence = 25, int useSequenceColor = 0){
-
-        ledLigth sequence[sequenceRows][sequenceColumns];
-        switch (sequenceType) {
-            case 1:  //PREON
-              memcpy(sequence, this->preONSequence, sizeof(sequence));
-              break;
-            default:  // BLADE
-              memcpy(sequence, this->bladeSequence, sizeof(sequence));
-              break;
-        }
-
+        FastLED.setBrightness(180);  // ~70% of LED strip brightness
         // Serial.println("preon");
         for ( int i = 0; i < sequenceRows; ++i)
         {
@@ -96,17 +114,21 @@ class LightSaber {
             {
                 // check if value exists
                 if (sequence[i][j].to != 0){
-                  lightLedsFromTo(sequence[i][j], useSequenceColor);
+                  lightLedsFromTo(this->preONSequence[i][j], useSequenceColor);
                 }
             }
-      
           // add delay between sequence
           delay(delayBetweenSequence);
         }
+
+        FastLED.setBrightness(100);  // ~40% of LED strip brightness
+        FastLED.show();
     }
 
+
+
   // Display parts of sequence
-  void lightLedsFromTo(ledLigth sequence, int useSequenceColor = 0) {
+  void lightLedsFromTo(ledLigth sequence, int useSequenceColor = 0, int delayBetweenLeds=0) {
     // Serial.println("lightLedsFromTo\n\r");
     for (int i = sequence.from; i <= sequence.to; ++i)
     {   
@@ -123,6 +145,9 @@ class LightSaber {
               break;
             case 25:
               substractRGB = 192;
+              break;
+            case 10:
+              substractRGB = 230;
               break;
             case 0:
               substractRGB = 255;
@@ -152,6 +177,8 @@ class LightSaber {
         // Serial.println("\n\r");
         setPixel(i, ledRed, ledGreen, ledBlue);
         FastLED.show();
+
+        delay(delayBetweenLeds);
     }
 
   }
@@ -181,40 +208,84 @@ class LightSaber {
     switch (color) {
       case 0:
         this->saberColor = {255,0,0};
+        Serial.println("Red");
         break;
       case 1:
         this->saberColor = {0,0,255};
+        Serial.println("Green");
         break;
       case 2:
         this->saberColor = {0,255,0};
+        Serial.println("Blue");
         break;
       case 3:
         this->saberColor = {255,0,255};
+        Serial.println("Pink");
         break;
       case 4:
         this->saberColor = {255,255,0};
+        Serial.println("Yellow");
         break;
       case 5:
         this->saberColor = {0,255,255};
+        Serial.println("Ice Blue");
         break;
     }
   }
 
   protected:
+   
+   ledLigth sequence[sequenceRows][sequenceColumns];
 
    ledLigth preONSequence[sequenceRows][sequenceColumns] = { 
       {{0,_NUM_LEDS_,0,_BLACK_}}
     };
 
-   ledLigth bladeSequence[sequenceRows][sequenceColumns] = { 
-      {{0,_NUM_LEDS_,75,_GREEN_}},
-      {{0,_NUM_LEDS_,75,_GREEN_}},
-      {{0,_NUM_LEDS_,75,_GREEN_}},
-      {{0,_NUM_LEDS_,75,_GREEN_}},
-      {{0,_NUM_LEDS_,75,_GREEN_}},
-      {{0,_NUM_LEDS_,75,_GREEN_}},
-      {{0,_NUM_LEDS_,75,_GREEN_}},
-      {{0,_NUM_LEDS_,50,_GREEN_}}
+   ledLigth bladeSequence[sequenceRows][sequenceColumns] = { {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,50,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,50,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,50,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,50,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,50,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}},
+    {{0,_NUM_LEDS_,75,_GREEN_}}
     };
 
 };

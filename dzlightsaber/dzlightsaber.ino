@@ -9,7 +9,7 @@
 // SynthSound *humSound = 0;
 #include "Arduino.h"
 #include "Audio.h"
-// #include <SD.h>
+#include "SD.h"
 #include "FS.h"
 #include <FastLED.h>
 
@@ -20,36 +20,32 @@
 
 // // ---------------------------- SETTINGS -------------------------------
 // #define NUM_LEDS 60         // number of microcircuits WS2811 on LED strip (note: one WS2811 controls 3 LEDs!)
-// #define BTN_TIMEOUT 800     // button hold delay, ms
+// #define BTN_HOLD_TIMEOUT 800     // button hold delay, ms
 // #define BRIGHTNESS 255      // max LED brightness (0 - 255)
 // #define LED_PIN 4
 
-// // microSD Card Reader connections
-// #define SD_CS          5
-// #define SPI_MOSI      23 
-// #define SPI_MISO      18
-// #define SPI_SCK       19
- 
-// // I2S Connections
-// #define I2S_DOUT      22
-// #define I2S_BCLK      26
-// #define I2S_LRC       25
- 
- // Create Audio object
-Audio audio;
-
-// // Define the array of leds
-// CRGB ledsStrip[NUM_LEDS];
-
 
 static const int buttonPin = 17;
-
 int pressed = 0;
-bool on = false;
-
+bool isSaberOn = false;
 bool preOnDone = false;
 
-byte nowColor, red, green, blue, redOffset, greenOffset, blueOffset;
+
+// // ---------------------------- SD / AMP -------------------------------
+// Digital I/O used
+#define SD_CS          5
+#define SPI_MOSI      23    // SD Card
+#define SPI_MISO      19
+#define SPI_SCK       18
+
+#define I2S_DOUT  22
+#define I2S_BCLK  26
+#define I2S_LRC   25
+ 
+
+
+
+
 // CRGB ledsStrip[NUM_LEDS];
 
 // AudioSystem audioSystem(22050, 500);
@@ -61,311 +57,281 @@ byte switchColor = 0;
 LightSaber s1= LightSaber();
 KyloRenSaber* k1;
 
+const char* audiofilenames[] = {
+  "/vader/vader_menu.wav",
+  "/kyloren/kylo_menu.wav",
+  "/kyloren/kylo_wait.wav"
+  };
+
 void setup() {
 
     Serial.begin(115200);
     Serial.print("OK");
-
-    k1 = new KyloRenSaber();
-  // sounds.play(audioSystem, 0, 0.5, 1);  
-  // humSound = new SynthSound();
-  // humSound->init(audioSystem);
-  // audioSystem.play(humSound);
-
-    // // Set microSD Card CS as OUTPUT and set HIGH
-    // pinMode(SD_CS, OUTPUT);      
-    // digitalWrite(SD_CS, HIGH); 
-
-    // // Initialize SPI bus for microSD Card
-    // SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
-
-
-
-    // if(!SD.begin(SD_CS))
-    // {
-    //   Serial.println("Error accessing microSD card!");
-    //   while(true); 
-    // } else {
-    //   Serial.println("ACCESS OK");
-    // }
     
-    // // Setup I2S 
-    // audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
-    
-    // // Set Volume
-    // audio.setVolume(5);
-    
-    // // Open music file
-    // audio.connecttoFS(SD,"/test.mp3");
+    // SD
+    pinMode(SD_CS, OUTPUT);      
+    digitalWrite(SD_CS, HIGH);
+    SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
 
-
-
-
+    // Blade off init
     FastLED.addLeds<WS2811, LED_PIN, GRB>(ledsStrip, NUM_LEDS);
     FastLED.setBrightness(100);  // ~40% of LED strip brightness
-    setAll(0, 0, 0);             // and turn it off
+    for (int i = 0; i < NUM_LEDS; i++ ) {
+      ledsStrip[i].r = 0;
+      ledsStrip[i].g = 0;
+      ledsStrip[i].b = 0;
+    }
+    FastLED.show();
+
+    // Create kylo saber
+    k1 = new KyloRenSaber();
+
+    // SD + SOUND
+    if(!SD.begin(SD_CS))
+    {
+      Serial.println("Error talking to SD card!");
+      while(true);  // end program
+    } else {
+      Serial.println("Connected to SD card!");
+    }
 
 
-  // KyloRenSaber s1= KyloRenSaber();
-    // s1= LightSaber();
-    // KyloRenSaber s1= KyloRenSaber();
-    // KyloRenSaber k2= KyloRenSaber(true,255,0,0);
-    // k1.display();
+    audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
+    audio.setVolume(18); // 0...21
+
+    // audio.connecttoFS(SD,"/vader/vader_menu.wav");
+    audio.connecttoSD("/kyloren/kylo_menu.wav");
+
 }
+
 
 void loop() {
 
+    audio.loop();  
+    
     // Calculate time for button
     static int time = 0;
     int t = millis();
     int dt = time - t;
     time = t;
 
-    
+
+    // audio.connecttoFS(SD, audiofilenames[0]); // Play Audio 1
+    // audio.connecttoFS(SD,"/kyloren/kylo_wait.wav");
+  
+
 
     // // Test Switch color
     // k1->switchColor(switchColor);
     // switchColor = switchColor == 5 ? 0 : switchColor+1;
 
-    // // Turn On
-    // k1->turnOn(preOnDone);  
-    // if (!preOnDone){
-    //   preOnDone = true;      
+    // // Display Blade sequence
+    // if (k1->isOn){
+    //   // Serial.println("Blade / ON");
+    //   k1->Blade(0);
+    // }
+    
+    // // Menu BTN
+    // btnMenuTick();
+    
+    // Power On/Off BTN
+    btnOnOffTick();
+
+
+    // if(!digitalRead(buttonPin))
+    // {    
+    //   pressed += dt;
+
+    //   // Serial.print("pressed");
+    //   // Serial.print("\t\t");
+    //   // Serial.print(pressed);
+    //   // Serial.println();
+
+    //   if(pressed < -2000)
+    //   {
+    //     if (isSaberOn){
+    //       isSaberOn = false;
+    //       Serial.print("OFF"); Serial.print("\t\t");
+    //       // k1->turnOff();
+    //       preOnDone = false;   
+
+    //     } else {
+    //       Serial.print("ON"); Serial.print("\t\t");
+          
+    //       // Turn On
+    //       isSaberOn = true;
+    //       k1->turnOn(preOnDone);  
+    //       if (!preOnDone){
+    //         preOnDone = true;      
+    //       }
+    //     }
+    //     pressed = 0;   
+    //   }
+    // }
+}
+
+
+
+#define DEBUG 1   
+#define BTN_HOLD_TIMEOUT 1000  
+#define EXIT_MENU_TIMEOUT 5000  
+
+boolean btnState, btn_flag, hold_flag;
+unsigned long btn_timer;
+byte btn_counter;   
+
+void btnOnOffTick() {
+  
+  // Read Button  
+  btnState = !digitalRead(buttonPin);
+
+  // Button is pressed
+  if (btnState && !btn_flag) {
+    btn_flag = 1;
+    btn_counter++;
+    btn_timer = millis();
+  }
+
+  // Button released
+  if (!btnState && btn_flag) {
+    btn_flag = 0;
+    hold_flag = 0;
+  }
+
+  // Button is held down during BTN_HOLD_TIMEOUT
+  if (btn_flag && btnState && (millis() - btn_timer > BTN_HOLD_TIMEOUT) && !hold_flag) {
+
+
+    if (!isSaberOn){
+      Serial.println(F("Turn On"));            
+      
+      // Turn On
+      isSaberOn = true;
+      k1->turnOn(preOnDone);  
+      if (!preOnDone){
+        preOnDone = true;      
+      }
+
+    } else {
+      Serial.println(F("Turn Off"));            
+      isSaberOn = false;
+      Serial.print("OFF"); Serial.print("\t\t");
+      // k1->turnOff();
+      preOnDone = false;  
+    }
+
+    hold_flag = 1;
+    btn_counter = 0;
+  }
+
+  // Multiple time clicked
+  if ((millis() - btn_timer > BTN_HOLD_TIMEOUT) && (btn_counter != 0)) {
+  
+    if (isSaberOn) {
+
+      // Clicked 3 times -> Change color
+      if (btn_counter >= 3) {               // 3 press count
+        
+        Serial.println(F("Switch Color"));
+
+        // Change color
+        switchColor++;
+
+        // Go back to first color
+        switchColor = switchColor > 5 ? 0 : switchColor;
+
+        Serial.print("New Color ");
+
+        // Switch color
+        k1->switchColor(switchColor);
+          
+      }
+
+    }
+
+    // Reset counter
+    btn_counter = 0;
+  }
+}
+
+
+
+boolean btnMenuState, isBtnMenuPressed = false, isBtnMenuHold = false, isMenuOpened = false;
+unsigned long btnMenutimer;
+byte btnMenucounter;   
+int menuOpt = 0, selectedMenuOpt = 0;
+
+void btnMenuTick() {
+  
+  // Read Button  
+  btnMenuState = !digitalRead(buttonPin);
+
+  // Button is pressed
+  if (btnMenuState && !isBtnMenuPressed) {
+    isBtnMenuPressed = true;
+    btnMenucounter++;
+    btnMenutimer = millis();
+  }
+
+  // Button released
+  if (!btnMenuState && isBtnMenuPressed) {
+    isBtnMenuPressed = false;
+    isBtnMenuHold = 0;
+  }
+
+  // Exit menu when no action during EXIT_MENU_TIMEOUT
+  if (millis() - btnMenutimer > EXIT_MENU_TIMEOUT && isMenuOpened){
+    Serial.println(F("EXIT MENU"));
+    isMenuOpened = false;
+    menuOpt = 0;
+  }
+
+  // Button is held down during BTN_HOLD_TIMEOUT
+  if (isBtnMenuPressed && btnMenuState && (millis() - btnMenutimer > BTN_HOLD_TIMEOUT) && !isBtnMenuHold) {
+    isBtnMenuHold = 1;
+    btnMenucounter = 0;
+     
+    // Change Menu
+    menuOpt++;  
+    menu(menuOpt);
+    isMenuOpened = true;
+  }
+
+  // Multiple time clicked
+  if ((millis() - btnMenutimer > BTN_HOLD_TIMEOUT) && (btnMenucounter != 0)) {
+  
+    // if (isSaberOn) {
+      
+      // Clicked 2 times to validate the menu
+      if (btnMenucounter == 2 && isMenuOpened) {            
+        Serial.println(F("MENU VALIDATE"));
+        selectedMenuOpt = menuOpt;
+        isMenuOpened = false;
+        Serial.println(F("EXIT MENU"));
+      }
+
     // }
 
-    // Serial.print("OloopK");
-    // audio.loop();   
+    // Reset counter
+    btnMenucounter = 0;
+  }
 
-  
-    if(!digitalRead(buttonPin))
-    {    
-      pressed += dt;
+}
 
-      // Serial.print("pressed");
-      // Serial.print("\t\t");
-      // Serial.print(pressed);
-      // Serial.println();
 
-      if(pressed < -2000)
-      {
-        if (on){
-          on = false;
-          Serial.print("OFF"); Serial.print("\t\t");
-          k1->turnOff();
-          preOnDone = false;   
 
-        } else {
-          on = true;
-          Serial.print("ON"); Serial.print("\t\t");
-          
-          // Turn On
-          k1->turnOn(preOnDone);  
-          if (!preOnDone){
-            preOnDone = true;      
-          }
-        }
-        pressed = 0;   
-      }
+  void menu(int menuOpt) {
+
+    menuOpt = menuOpt > 4 ? 0 : menuOpt;
+    switch (menuOpt) {
+      case 0:
+        Serial.println("Menu 0");
+        audio.connecttoFS(SD, audiofilenames[0]);
+        break;
+      case 1:
+        Serial.println("Menu 1");
+        audio.connecttoFS(SD, audiofilenames[1]);
+        break;
+        break;
     }
-}
-
-
-
-// void kyloSequence(int delayBetweenSequence){
-//     Serial.print("preon");
-//     for ( int i = 0; i < 24; ++i)
-//     {
-//         for ( int j = 0; j < 14; ++j)
-// 	      {
-//             // check if value exists
-//             if (kyloBlade[i][j].to != 0){
-//     	        lightFromTo(kyloBlade[i][j]);
-//     	      }
-// 	      }
-  
-// 	    // add delay between sequence
-//       delay(delayBetweenSequence);
-//     }
-// }
-
-// void preonSequence(int delayBetweenSequence){
-//     Serial.print("preon");
-//     for ( int i = 0; i < sequenceRows; ++i)
-//     {
-//         for ( int j = 0; j < sequenceColumns; ++j)
-// 	      {
-//             // check if value exists
-//             if (kylo_preon[i][j].to != 0){
-//     	        lightFromTo(kylo_preon[i][j]);
-//     	      }
-// 	      }
-  
-// 	    // add delay between sequence
-//       delay(delayBetweenSequence);
-//     }
-// }
-
-
-// void lightFromTo(ledLigth sequence) {
-//   Serial.print("Light");
-//     for (int i = sequence.from; i <= sequence.to; ++i)
-//     {
-//         // cout << "z :" << z << "\n\r";
-//         // cout << "sequence color brightness :" << sequence.brightness << "\n\r";
-//         // cout << "sequence color r :" << sequence.color.r << "\n\r";
-//         // cout << "sequence color g :" << sequence.color.g << "\n\r";
-//         // cout << "sequence color b :" << sequence.color.b << "\n\r";
-        
-//         int substractRGB = 0;
-//         switch (sequence.brightness) {
-//             case 100:
-//               substractRGB = 0;
-//               break;
-//             case 75:
-//               substractRGB = 64;
-//               break;
-//             case 50:
-//               substractRGB = 128;
-//               break;
-//             case 25:
-//               substractRGB = 192;
-//               break;
-//             case 0:
-//               substractRGB = 255;
-//               break;
-//         }
-
-//         int ledRed = sequence.color.r - substractRGB;
-//         if (sequence.color.r - substractRGB < 0){
-//           ledRed = 0;                    
-//         }
-
-//         int ledGreen = sequence.color.g - substractRGB;
-//         if (sequence.color.g - substractRGB < 0){
-//           ledGreen = 0;                    
-//         } 
-
-//         int ledBlue = sequence.color.b - substractRGB;
-//         if (sequence.color.b - substractRGB < 0){
-//           ledBlue = 0;                    
-//         } 
-        
-//          Serial.print(ledRed);
-//          Serial.print(" ");
-//          Serial.print(ledGreen);
-//          Serial.print(" ");
-//          Serial.print(ledBlue);
-//         Serial.print("\n\r");
-//         setPixel(i, ledRed, ledGreen, ledBlue);
-//         // setPixel(i, 255, 0, 0);
-//         FastLED.show();
-//         // delay(25);
-//     }
-// }
-
-
-void setPixel(int Pixel, byte red, byte green, byte blue) {
-  ledsStrip[Pixel].r = red;
-  ledsStrip[Pixel].g = green;
-  ledsStrip[Pixel].b = blue;
-}
-
-void setAll(byte red, byte green, byte blue) {
-  for (int i = 0; i < NUM_LEDS; i++ ) {
-    setPixel(i, red, green, blue);
   }
-  FastLED.show();
-}
-
-void light_up(byte red, byte green, byte blue) {
-  for (char i = 0; i <= (NUM_LEDS - 1); i++) {        
-    setPixel(i, red, green, blue);
-    FastLED.show();
-    delay(5);
-  }
-}
-
-void light_down() {
-  for (char i = (NUM_LEDS - 1); i >= 0; i--) {      
-    setPixel(i, 0, 0, 0);
-    FastLED.show();
-    delay(5);
-  }
-}
-
-void turnOn()
-{
-    Serial.print("+++++++++ turnON +++++++++");
-    light_up(255,255,0);
-     
-}
-
-void turnOff()
-{
-    Serial.print("+++++++++ turnOff +++++++++");
-    light_down();          
-    delay(500);
-}
-
-
-void setColor(byte color) {
-  switch (color) {
-    // 0 - red, 1 - green, 2 - blue, 3 - pink, 4 - yellow, 5 - ice blue
-    case 0:
-      red = 255;
-      green = 0;
-      blue = 0;
-      break;
-    case 1:
-      red = 0;
-      green = 0;
-      blue = 255;
-      break;
-    case 2:
-      red = 0;
-      green = 255;
-      blue = 0;
-      break;
-    case 3:
-      red = 255;
-      green = 0;
-      blue = 255;
-      break;
-    case 4:
-      red = 255;
-      green = 255;
-      blue = 0;
-      break;
-    case 5:
-      red = 0;
-      green = 255;
-      blue = 255;
-      break;
-  }
-}
-
-// void turnOn()
-// {
-//     Serial.print("turnON ++ ");
-//   // sounds.play(audioSystem, 0, 0.5, 1);  
-//   // humSound = new SynthSound();
-//   // humSound->init(audioSystem);
-//   // audioSystem.play(humSound);
-//   // on = true;
-//   // visibleLeds = 0;
-//   //gyro.wakeUp();
-// }
-
-
-// void turnOff()
-// {
-//   //   Serial.print("turnOff --");
-//   // sounds.play(audioSystem, 1, 0.5, 1);  
-//   // audioSystem.stop(humSound);
-//   // humSound = 0;   
-//   // on = false;
-//   //visibleLeds = ledCount * speed + 100;
-// }
-
-
-
